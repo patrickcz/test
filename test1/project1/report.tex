@@ -1,0 +1,153 @@
+\documentclass{article}
+
+% Language setting
+% Replace `english' with e.g. `spanish' to change the document language
+\usepackage[english]{babel}
+\usepackage[ruled,vlined]{algorithm2e}
+% Set page size and margins
+% Replace `letterpaper' with `a4paper' for UK/EU standard size
+\usepackage[letterpaper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+
+% Useful packages
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+
+\usepackage{amsthm}
+\newtheorem{theorem}{Theorem}[section]
+
+\usepackage{hyperref}
+\usepackage{xurl}
+\def\UrlBreaks{%
+	\do\/%
+	\do\a\do\b\do\c\do\d\do\e\do\f\do\g\do\h\do\i\do\j\do\k\do\l%
+	\do\m\do\n\do\o\do\p\do\q\do\r\do\s\do\t\do\u\do\v\do\w\do\x\do\y\do\z%
+	\do\A\do\B\do\C\do\D\do\E\do\F\do\G\do\H\do\I\do\J\do\K\do\L%
+	\do\M\do\N\do\O\do\P\do\Q\do\R\do\S\do\T\do\U\do\V\do\W\do\X\do\Y\do\Z%
+	\do0\do1\do2\do3\do4\do5\do6\do7\do8\do9\do=\do/\do.\do:%
+	\do\*\do\-\do\~\do\'\do\"\do\-}
+
+
+\usepackage{xcolor}      %代码着色宏包
+\usepackage{listings}
+\lstset{
+	columns=fixed,       
+	numbers=left, % 在左侧显示行号
+	xleftmargin=0em,xrightmargin=0em,aboveskip=1pt,
+	stepnumber=10 ,                                      % 每十行标号一次
+	numberstyle=\tiny\color{gray},                       % 设定行号格式
+	frame=None,                                          % 不显示背景边框
+	extendedchars=false,                                 % 解决代码跨页时，章节标题，页眉等汉字不显示的问题
+	backgroundcolor=\color[RGB]{245,245,244},            % 设定背景颜色
+	keywordstyle=\color[RGB]{40,40,255},                 % 设定关键字颜色
+	commentstyle=\it\color[RGB]{0,96,96},                % 设置代码注释的格式
+	stringstyle=\rmfamily\slshape\color[RGB]{128,0,0},   % 设置字符串格式
+	showstringspaces=false,                              % 不显示字符串中的空格
+}
+
+\title{\textbf{Project: Structure Diversity}}
+\author{Zhicong Chen, 521120910256,\\ 2028602614@qq.com }
+
+
+\begin{document}
+	\rmfamily
+	\maketitle
+	\iffalse
+	\begin{abstract}
+		Your abstract.
+	\end{abstract}
+	\fi
+	\section{Introduction} \label{sec:intro}
+	Structure diversity of a node is the number of connected components of the induced graph, which consists of all neighbors of the node and edges between them. In this project, we are required to solve for structure diversity of each node in the graph. To solve this question, I applied two kinds of algorithms and implemented them with designed data structure. The outline of this report is given as below. In Section \ref{sec:algo}, I describe two algorithms, \textit{Disjoint Set} and \textit{Depth-First Search} and analyze their time complexity and space complexity. Implementation and applied data structure of two algorithms are given in Section \ref{sec:imple}. Finally, I report results of execution and analyze it in Section \ref{sec:result}.
+	
+	\section{Algorithm} \label{sec:algo}
+	To finish the task, I did not exploit or design complicated algorithm, and instead I applied disjoint set and depth-first search, making some task-oriented improvements on them to improve performance. For analysis of complexity, the following notations will be used throughout the report.
+	
+	\begin{itemize}
+		\item $V_i$ : All the neighbors of node $v_i$ 
+		\item $E_i$ : The edges between all vertices in $V_i$ 
+		\item $|V_i|$ : The quantity of vertices in $V_i$
+		\item $|E_i|$ : The quantity of edges in $E_i$
+	\end{itemize}
+	
+	\subsection{Disjoint Set}
+	Disjoint Set is a kind of data structure to figure out all connected components in a graph. It consists of a collection of disjoint sets, where the union of these disjoint sets forms all the points of the graph. Two core operations during construction of disjoint set are \textit{union} and \textit{find}. 
+	
+	For the basic version, we exploit list to perform \textit{union} and \textit{find}, and the time complexity is $O(N)$ and $O(1)$, respectively. But if we exploit \textit{Union by Size} and \textit{Path Compression}, both of their time complexity is $O(\log N)$ in the worst case. Consequently, when solving for vertex $i$ , time complexity is $O(|E_i| \log |V_i|)$ and space complexity is $O(|V_i|)$ when building disjoint sets. Besides, to get all edges of $G_i(V_i, E_i)$, $O(\sum_{v_j \in V_i}^{} |V_j|)$ time cost is also needed, since we need to traverse neighbors of all vertices in $V_i$. Given all above, solving for one node costs $O( \sum_{v_j \in V_i}^{} |V_j| + |E_i| \log |V_i|)$ time. As for all nodes, we notice that $|V_i|$ is added in $|V_i|$ times as node $i$ is in $|V_i|$ induced graphs $G_i(V_i, E_i)$ and therefore the final result is $O( \sum_{v_i \in V}^{} (|V_i|^2 + |E_i| \log |V_i|))$ of time cost and $O(|E|)$ of space cost ( notice that $\sum_{v_i \in V}^{} |V_i| = |E|/2$ ). In the worst case the time complexity is $O(|V|^3 + |E| \log |V|)$.
+	 
+	\subsection{DFS Tree}
+	Depth first search (DFS) tree is a fundamental data structure for solving various problems in graphs. Following pseudo code illustrates the formation of DFS tree.
+	
+	
+	\begin{algorithm}[H]
+		\SetKwFunction{DFS}{DFS}
+		\SetAlgoLined
+		\KwData{Graph $G(V,E)$ and root node $v(v \in V)$}
+		\KwResult{DFS Tree $T(V)$}
+		
+		\BlankLine
+		\SetAlgoLined
+		\DFS($G$)\;
+		\SetKwProg{Fn}{Function}{:}{}
+		\Fn{\DFS{$G$}}{
+			\For{each vertex $v \in G$}{
+				\If{$v$ is not visited}{
+					mark $v$ as visited\;
+					\DFS{explore neighbors of $v$}\;
+				}
+			}
+		}
+
+		\caption{DFSTree(\textbf{G},v)}
+	\end{algorithm}
+	
+	\vspace{1em}
+	This website page \footnote{\href{https://blog.csdn.net/weixin_43848437/article/details/105133155}{https://blog.csdn.net/weixin\_43848437/article/details/105133155}} gives the following theorem and proof of it, which is fundamental for the algorithm.
+	
+	\begin{theorem} \label{thm1}
+	In a DFS tree, endpoints of the edge not in the DFS tree have an ancestor-descendant relationship.
+	\end{theorem}
+	
+	According to Theorem \ref{thm1}, in a connected graph, when we delete root node of DFS Tree from the graph, the number of connected components equals to that of sons of root node in DFS Tree. Since subtrees rooted at its child nodes are disconnected from each other. We can perform DFS until all vertices have been visited and count marked edges starting with root node as its structure diversity. 
+	
+	When solving for node $i$, the time complexity is $O(|V_i| + \sum_{v_j \in V_i}^{} |V_j|)$ and the space complexity is $O(|V_i|)$. For all nodes, the time complexity is $O(|V|^3)$ in the worst case and the space complexity is $O(|E|)$.
+
+	\section{Implementation} \label{sec:imple}
+	Requirements for execution are listed as follows.
+	\vspace{0.5em}
+	\begin{lstlisting}
+PyThon >=  3.7
+numpy
+time
+	\end{lstlisting}
+	
+	\subsection{Disjoint Set} 
+	Process of forming disjoint sets are encapsulated into class \texttt{DisjointSet}. To store \textit{setsize} and \textit{parent} information, I used Python \texttt{dict} for this. Hence, it costs $O(|V_i|)$ memory space. Function \texttt{StructureDiversityWithDJSet} solves for structure diversity question of input graph and you can exploit it in main function to test its performance.
+	   
+	\subsection{DFS Tree}
+	Process of forming disjoint sets are encapsulated into class \texttt{DFS}. I used a stack with space of $O(|V_i|)$ to store frontier vertices and a dict with space of $O(|V_i|)$ to record whether vertices have been visited and marked. The vertex will be marked if and only if its parent node is root node and is visited for the first time. The quantity of marked vertices is the number of sons of root node in DFS Tree, that is, its structure diversity. 
+	
+	\section{Results} \label{sec:result}
+	
+	Time cost of each algorithm can be referred in the following table. \vspace{9em}
+	\begin{table}[h]
+		\centering
+		\begin{tabular}{c|c}
+			Algorithm & Time Cost(s) \\\hline
+			Disjoint Set & 0.070 \\
+			DFS Tree & 0.097
+		\end{tabular}
+		\caption{\label{tab:widgets}Time cost of each algorithm.}
+	\end{table}
+
+	By comparison, Disjoint Set performed well than DFS Tree in the test, which is inconsistent with my analysis of time complexity. I give some reasons for the result.
+	
+	\begin{enumerate}
+		\item The input graph is sparse and the number of vertices and edges is not large enough to meet the upper bound of time complexity.
+		\item There exists more judge statements in DFS Tree which cost much time compared to other instructions.
+	\end{enumerate}
+	
+	
+
+	
+\end{document}
